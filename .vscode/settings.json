@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "blocks.h": "c",
+        "random": "c"
+    }
+}
