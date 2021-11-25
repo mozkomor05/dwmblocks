@@ -1,7 +1,7 @@
 //Modify this file to change what commands output to your statusbar, and recompile using the make command.
 static const Block blocks[] = {
 	/*Icon*/	/*Command*/	 	/*Update Interval*/	/*Update Signal*/
-	{"\x02\xef\x95\xb8 ",	"echo '100%'",					60,	4},
+	{"\x02",				"db-battery",					60,	4},
 
 	{"\x07\xef\x84\x9c ",	"xkb-switch",					60,	3},
 

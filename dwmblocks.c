@@ -29,12 +29,22 @@ void setupsignals();
 void sighandler(int signum);
 #endif
 int getstatus(char *str, char *last);
-void setroot();
 void statusloop();
 void termhandler(int signum);
 void pstdout();
+#ifndef NO_X
+void setroot();
+static void (*writestatus) () = setroot;
+static int setupX();
+static Display *dpy;
+static int screen;
+static Window root;
+#else
+static void (*writestatus) () = pstdout;
+#endif
 
 #include "blocks.h"
+
 
 static Display *dpy;
 static int screen;
@@ -42,7 +52,6 @@ static Window root;
 static char statusbar[LENGTH(blocks)][CMDLENGTH] = {0};
 static char statusstr[2][STATUSLENGTH];
 static int statusContinue = 1;
-static void (*writestatus)() = setroot;
 
 int gcd(int a, int b)
 {
@@ -152,20 +161,27 @@ int getstatus(char *str, char *last)
 	return strcmp(str, last); //0 if they are the same
 }
 
+#ifndef NO_X
 void setroot()
 {
-	if (!getstatus(statusstr[0], statusstr[1])) //Only set root if text has changed.
+	if (!getstatus(statusstr[0], statusstr[1]))//Only set root if text has changed.
 		return;
-	Display *d = XOpenDisplay(NULL);
-	if (d)
-	{
-		dpy = d;
+	XStoreName(dpy, root, statusstr[0]);
+	XFlush(dpy);
+}
+
+int setupX()
+{
+	dpy = XOpenDisplay(NULL);
+	if (!dpy) {
+		fprintf(stderr, "dwmblocks: Failed to open display\n");
+		return 0;
 	}
 	screen = DefaultScreen(dpy);
 	root = RootWindow(dpy, screen);
-	XStoreName(dpy, root, statusstr[0]);
-	XCloseDisplay(dpy);
+	return 1;
 }
+#endif
 
 void pstdout()
 {
@@ -253,20 +269,25 @@ void termhandler(int signum)
 	exit(0);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	for (int i = 0; i < argc; i++)
-	{
-		if (!strcmp("-d", argv[i]))
+	for (int i = 0; i < argc; i++) {//Handle command line arguments
+		if (!strcmp("-d",argv[i]))
 			strncpy(delim, argv[++i], delimLen);
-		else if (!strcmp("-p", argv[i]))
+		else if (!strcmp("-p",argv[i]))
 			writestatus = pstdout;
 	}
-
+#ifndef NO_X
+	if (!setupX())
+		return 1;
+#endif
 	delimLen = MIN(delimLen, strlen(delim));
 	delim[delimLen++] = '\0';
-
 	signal(SIGTERM, termhandler);
 	signal(SIGINT, termhandler);
 	statusloop();
+#ifndef NO_X
+	XCloseDisplay(dpy);
+#endif
+	return 0;
 }

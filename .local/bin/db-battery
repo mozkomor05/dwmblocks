@@ -1,0 +1,48 @@
+#!/bin/sh
+
+case $BLOCK_BUTTON in
+	4) xbacklight -inc 10 ;;
+	5) xbacklight -dec 10 ;;
+esac
+
+for battery in /sys/class/power_supply/BAT?*; do
+	# If non-first battery, print a space separator.
+	[ -n "${capacity+x}" ] && printf " "
+	battery_percent="$(cat "$battery/capacity" 2>&1)"
+	if [ "$battery_percent" -gt 90 ]; then
+        icon="\xef\x95\xb8"
+		icon_charging="\xef\x96\x83"
+    elif [ "$battery_percent" -gt 80 ]; then
+        icon="\xef\x96\x81"
+		icon_charging="\xef\x96\x8a"
+    elif [ "$battery_percent" -gt 70 ]; then
+        icon="\xef\x96\x80"
+		icon_charging="\xef\x96\x89"
+    elif [ "$battery_percent" -gt 60 ]; then
+        icon="\xef\x95\xbf"
+		icon_charging="\xef\x96\x88"
+    elif [ "$battery_percent" -gt 50 ]; then
+        icon="\xef\x95\xbe"
+		icon_charging="\xef\x96\x88"
+    elif [ "$battery_percent" -gt 40 ]; then
+        icon="\xef\x95\xbd"
+		icon_charging="\xef\x96\x87"
+    elif [ "$battery_percent" -gt 30 ]; then
+        icon="\xef\x95\xbc"
+		icon_charging="\xef\x96\x87"
+    elif [ "$battery_percent" -gt 20 ]; then
+        icon="\xef\x95\xbb"
+		icon_charging="\xef\x96\x86"
+    elif [ "$battery_percent" -gt 10 ]; then
+        icon="\xef\x95\xba"
+		icon_charging="\xef\x96\x86"
+    else
+        icon="\xef\x95\xb9"
+		icon_charging="\xef\x96\x85"
+    fi
+	if [ "$(cat /sys/class/power_supply/BAT1/status 2>&1)" = "Charging" ]; then
+		printf "$icon_charging %d%%" "$battery_percent";
+	else
+		printf "$icon %d%%" "$battery_percent";
+	fi
+done && printf "\\n"
