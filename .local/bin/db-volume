@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Prints the current volume or 🔇 if muted.
+
+case $BLOCK_BUTTON in
+	1) setsid -f "easyeffects" ;;
+	3) pamixer -t ;;
+	4) pamixer --allow-boost -i 1 ;;
+	5) pamixer --allow-boost -d 1 ;;
+esac
+
+[ $(pamixer --get-mute) = true ] && printf "\xef\xaa\x80 mute" && exit
+
+vol="$(pamixer --get-volume)"
+
+if [ "$vol" -gt "70" ]; then
+	icon="\xef\xa9\xbd"
+elif [ "$vol" -gt "30" ]; then
+	icon="\xef\xa9\xbf"
+elif [ "$vol" -gt "0" ]; then
+	icon="\xef\xa9\xbe"
+else
+        icon="\xef\xaa\x80"
+fi
+
+printf "$icon %d%%" "$vol"
