@@ -1,0 +1,9 @@
+#!/bin/sh
+
+date_format="%a, %d. %b - %H:%M"
+
+case $BLOCK_BUTTON in
+    1) galendae &;;
+esac
+
+printf "%s" "$(date +"$date_format")"

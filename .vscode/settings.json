@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "blocks.h": "c",
-        "random": "c"
+        "random": "c",
+        "signalfd.h": "c",
+        "epoll.h": "c"
     }
 }
